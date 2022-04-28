@@ -1,0 +1,15 @@
+﻿[Dd]ebug/
+[Rr]elease/
+x64/
+[Bb]in/
+[Oo]bj/
+
+.vs/
+.vscode/
+
+*.vcxproj
+*.sln
+*.filters
+*.user
+
+*.obj
