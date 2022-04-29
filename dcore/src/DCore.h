@@ -1,6 +1,5 @@
 #pragma once
 
-
 #ifdef DOVE_CPP_NATIVE
     #define DCORE
 #else

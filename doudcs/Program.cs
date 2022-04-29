@@ -6,8 +6,13 @@ namespace doudcs
     {
         static void Main(string[] args)
         {
-            DoudCore.DWTKCreateWindow("");
-            DoudCore.DWTKRun();
+            DoudCore.CreateWindow("");
+
+            int result = 1;
+            while (result != 0) {
+                DoudCore.ProcessEvent();
+            }
+            
         }
     }
 }

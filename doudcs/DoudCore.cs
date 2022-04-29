@@ -10,13 +10,13 @@ namespace doudcs
 {
     class DoudCore
     {
-        [DllImport("dcore")]
-        private static extern void DWTKCreateWindow(IntPtr instance, string cmd_line, int show_code);
-        public static void DWTKCreateWindow(string cmd_line) {
-            DWTKCreateWindow(Process.GetCurrentProcess().Handle, cmd_line, 1);
-        }
+        [DllImport("dcore", EntryPoint = "DWTKCreateWindow")]
+        private static extern void CreateWindow(IntPtr instance, string cmd_line, int show_code);
 
-        [DllImport("dcore")]
-        public static extern void DWTKRun();
+        public static void CreateWindow(string cmd_line) {
+            CreateWindow(Process.GetCurrentProcess().Handle, cmd_line, 1);
+        }
+        [DllImport("dcore", EntryPoint = "DWTKProcessWindowEvent")]
+        public static extern int ProcessEvent();
     }
 }

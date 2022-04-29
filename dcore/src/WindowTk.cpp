@@ -3,7 +3,6 @@
 
 namespace WindowTk
 {
-
 HWND window_handle = 0;
 
 LRESULT CALLBACK wnd_proc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) {
@@ -17,7 +16,7 @@ LRESULT CALLBACK wnd_proc(HWND window, UINT message, WPARAM wparam, LPARAM lpara
             RECT rect = {0, 0, 800, 600};
             SetTextColor(dc_handle, RGB(0, 0, 255));
             TCHAR* text = _T("Hello Cloud | 你好 云朵");
-            DrawText(dc_handle, text, _tcslen(text), &rect, DT_CENTER | DT_VCENTER);
+            DrawText(dc_handle, text, (int)_tcslen(text), &rect, DT_CENTER | DT_VCENTER);
             EndPaint(window_handle, &ps);
         } break;
         case WM_CLOSE: {
@@ -43,17 +42,18 @@ void DWTKCreateWindow(HINSTANCE instance, TCHAR* cmd_line, int show_code) {
 
     RegisterClass(&wnd_class);
 
-    window_handle = CreateWindowEx(0, wnd_class.lpszClassName,
-                            _T("Doud"),
-                            WS_OVERLAPPEDWINDOW,
-                            CW_USEDEFAULT, 
-                            CW_USEDEFAULT,
-                            800, 
-                            600,
-                            nullptr, 
-                            nullptr,
-                            instance,
-                            nullptr);
+    window_handle = CreateWindowEx(
+        0, wnd_class.lpszClassName,
+        _T("doud"),
+        WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, 
+        CW_USEDEFAULT,
+        800, 
+        600,
+        nullptr, 
+        nullptr,
+        instance,
+        nullptr);
     if (!window_handle) {
         MessageBox(nullptr, _T("failed to create window"), _T("error"), MB_OK);
     }
@@ -62,16 +62,19 @@ void DWTKCreateWindow(HINSTANCE instance, TCHAR* cmd_line, int show_code) {
     UpdateWindow(window_handle);
 }
 
+int DWTKProcessWindowEvent() {
+    MSG msg;
+    int result = GetMessage(&msg, window_handle, 0, 0);
+    TranslateMessage(&msg);
+    DispatchMessage(&msg);
+    return result;
+}
+
 void DWTKRun() {
     MSG msg;
-    while (BOOL result = GetMessage(&msg, nullptr, 0, 0)) {
-        if (result > 0) {
-            // @Update:
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        } else {
-            break;
-        }
+    int result = 1;
+    while (result != 0) {
+        result = DWTKProcessWindowEvent();
     }
 }
 
