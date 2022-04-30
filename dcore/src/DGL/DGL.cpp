@@ -4,8 +4,21 @@
 
 namespace DGL
 {
-
 bool DGL_INITED = false;
+
+void SetClearColor(glm::vec4 color) {
+    glClearColor(color.r, color.g, color.b, color.a);
+}
+
+void ClearFramebuffer(ClearMask mask) {
+    glClear((GLbitfield)mask);
+}
+
+void SetViewport(int x, int y, int width, int height) {
+    glViewport(x, y, width, height);
+}
+
+
 void InitOpenGL(HWND wnd_handle) {
     HDC device_context = GetDC(wnd_handle);
 

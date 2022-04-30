@@ -14,6 +14,11 @@ namespace Application
             case WM_PAINT: {
                 APP->Draw();
             } break;
+            case WM_SIZE: {
+                APP->width = LOWORD(lparam);
+                APP->height = HIWORD(lparam);
+                if (DGL::DGL_INITED) DGL::SetViewport(0, 0, APP->width, APP->height);
+            } break;
             case WM_CLOSE: {
                 PostQuitMessage(0);
             } break;
@@ -30,16 +35,17 @@ namespace Application
 
     void InitApp(HINSTANCE instance, TCHAR* cmd_line) {
         if (app_inited) return;
-        APP = new App(instance, cmd_line);
+        APP = new App(cmd_line);
+        WindowTk::DWTKCreateWindow(instance, cmd_line, AppWndProc,1);
+        DGL::InitOpenGL(WindowTk::window_handle);
         app_inited = true;
     }
     void Run() {
         if (app_inited) APP->Run();
     }
 
-    App::App(HINSTANCE instance, TCHAR* cmd_line) {
-        WindowTk::DWTKCreateWindow(instance, cmd_line, AppWndProc,1);
-        DGL::InitOpenGL(WindowTk::window_handle);
+    App::App(TCHAR* cmd_line) {
+        // TODO:
     }
 
     void App::Run() {
@@ -57,11 +63,12 @@ namespace Application
         if (DGL::DGL_INITED) {
             HWND wnd = WindowTk::window_handle;
             HDC hdc = GetDC(wnd);
-            {// OpenGL region
-                glClearColor(0.5f, 0.2f, 0.8f, 1.0f);
-                glClear(GL_COLOR_BUFFER_BIT);
-                SwapBuffers(hdc);
+            {
+                using namespace DGL;
+                SetClearColor({0.2f, 0.4f, 0.8f, 1.0f});
+                ClearFramebuffer(ClearMask::COLOR | ClearMask::DEPTH);
             }
+            SwapBuffers(hdc);
         }
     }
 

@@ -10,11 +10,14 @@ namespace Application
     class App
     {
         public:
-        App(HINSTANCE instance, TCHAR* cmd_line);
+        App(TCHAR* cmd_line);
         ~App();
 
         void Run();
         void Draw();
+        
+        int width = 0;
+        int height = 0;
     };
     
     extern App app;
