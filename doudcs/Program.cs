@@ -6,13 +6,9 @@ namespace doudcs
     {
         static void Main(string[] args)
         {
-            DoudCore.CreateWindow("");
+            DoudCore.InitApp("");
+            DoudCore.Run();
 
-            int result = 1;
-            while (result != 0) {
-                DoudCore.ProcessEvent();
-            }
-            
         }
     }
 }

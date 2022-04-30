@@ -5,10 +5,11 @@
 
 namespace WindowTk
 {
+using WndProc = LRESULT(*)(HWND window, UINT message, WPARAM wparam, LPARAM lparam);
+
 extern HWND window_handle;
 
-DCORE void DWTKCreateWindow(HINSTANCE instance, TCHAR* cmd_line, int show_code);
-DCORE int DWTKProcessWindowEvent();
-void DWTKRun();
+void DWTKCreateWindow(HINSTANCE instance, TCHAR* cmd_line, WndProc wnd_proc, int show_code);
+void DWTKProcessWindowEvent(MSG* msg);
 
 }
