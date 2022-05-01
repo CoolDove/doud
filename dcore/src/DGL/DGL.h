@@ -6,6 +6,8 @@
 #include "glm/glm.hpp"
 #include "BitTagEnum.h"
 
+#include "DGLBuffer.h"
+
 namespace DGL
 {
 extern bool DGL_INITED;

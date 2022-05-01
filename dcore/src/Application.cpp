@@ -35,6 +35,7 @@ namespace Application
 
     void InitApp(HINSTANCE instance, TCHAR* cmd_line) {
         if (app_inited) return;
+
         APP = new App(cmd_line);
         WindowTk::DWTKCreateWindow(instance, cmd_line, AppWndProc,1);
         DGL::InitOpenGL(WindowTk::window_handle);
@@ -42,6 +43,8 @@ namespace Application
     }
     void Run() {
         if (app_inited) APP->Run();
+    }
+    void ReleaseApp() {
     }
 
     App::App(TCHAR* cmd_line) {
@@ -65,7 +68,7 @@ namespace Application
             HDC hdc = GetDC(wnd);
             {
                 using namespace DGL;
-                SetClearColor({0.2f, 0.4f, 0.8f, 1.0f});
+                SetClearColor({0.9f, 0.4f, 0.8f, 1.0f});
                 ClearFramebuffer(ClearMask::COLOR | ClearMask::DEPTH);
             }
             SwapBuffers(hdc);
