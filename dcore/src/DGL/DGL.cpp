@@ -17,6 +17,11 @@ namespace DGL
 {
 
 bool DGL_INITED = false;
+DGLLogFunction DGL_ON_LOG = nullptr;
+
+void DGLLog(const std::string& msg) {
+    if (DGL_ON_LOG) DGL_ON_LOG(msg);
+}
 
 void SetClearColor(glm::vec4 color) {
     glClearColor(color.r, color.g, color.b, color.a);
@@ -82,7 +87,6 @@ void InitOpenGL(HWND wnd_handle) {
         if (modern_glrc) {
             // switch to modern openGL context
             wglMakeCurrent(dc, modern_glrc);
-            // gl_context_ = modern_glrc;
         }
 
         // NOTE: close the vsync

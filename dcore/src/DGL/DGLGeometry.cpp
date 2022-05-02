@@ -1,5 +1,4 @@
 ﻿#include "DGLGeometry.h"
-#include <initializer_list>
 
 namespace DGL
 {

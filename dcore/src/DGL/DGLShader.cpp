@@ -3,9 +3,9 @@
 #include <fstream>
 #include <windows.h>
 #include <stdarg.h>
-#include "DoveLog.hpp"
+#include "DGLLog.h"
 
-static char* read_file(const char* _path, int* _size = nullptr) {
+static char* read_file(const char* _path, size_t* _size = nullptr) {
     std::ifstream file(_path, std::ios_base::in);
     bool good = file.good();
     if (!file.good()) return nullptr;
@@ -40,7 +40,7 @@ void DGLNativeShader::Load(const std::string& path) {
 
 void DGLNativeShader::Compile(const std::string& src) {
     if (!native_id) {
-        DLOG_ERROR("native shader object has not been inited");
+        DGLLog("native shader object has not been inited");
         return;
     }
     glCompileShader(native_id);
@@ -53,7 +53,9 @@ void DGLNativeShader::Compile(const std::string& src) {
         glGetShaderiv(native_id, GL_INFO_LOG_LENGTH, &maxLength);
         char* infoLog = (char*)malloc(maxLength);
         glGetShaderInfoLog(native_id, maxLength, &returnLength, infoLog);
-        DLOG_ERROR("native shader error:\n %s", infoLog);
+        DGLLog("native shader error:");
+        DGLLog(infoLog);
+        DGLLog("\n");
         glDeleteShader(native_id);
 
         free(infoLog);
@@ -61,28 +63,24 @@ void DGLNativeShader::Compile(const std::string& src) {
 }
 
 /* >>>>DGLShader>>>> */
-void DGLShader::Init(int count, ... ) {
+void DGLShader::Init(std::initializer_list<DGLNativeShader*> shaders) {
     native_id = glCreateProgram();
 
     uint16_t mask = 0u;
     auto check_mask = [&mask](uint16_t _bit_pos){
         if (mask & 1u<<_bit_pos) {
-            DLOG_ERROR("trying to link uninited shader");
+            DGLLog("trying to link uninited shader");
         } else {
             mask = mask | 1u<<_bit_pos;
         }
     };
 
-    va_list args;
-    va_start(args, count); 
-
-    const DGLNativeShader* shader = nullptr;
-
-    for (int i = 0; i < count; i++) {
-        shader = va_arg(args, const DGLNativeShader*);
+    int i = 0;
+    for (auto ite = shaders.begin(); ite != shaders.end(); ite++) {
+        const DGLNativeShader* shader = *ite;
 
         if (!shader->IsGood()) {
-            DLOG_ERROR("shader is not good, failed to link program");
+            DGLLog("shader is not good, failed to link program");
             return;
         }
         
@@ -106,21 +104,19 @@ void DGLShader::Init(int count, ... ) {
 
         glAttachShader(native_id, shader->GetNativeID());
     }
-    va_end(args);
 
     glLinkProgram(native_id);
 
     GLint status;
     glGetProgramiv(native_id, GL_LINK_STATUS, &status);
     if (!status) {
-        DLOG_ERROR("failed to link program");
+        DGLLog("failed to link program");
         Release();
     }
 }
 
 void DGLShader::Bind() {
-    if (native_id)
-        glUseProgram(native_id);
+    if (native_id) glUseProgram(native_id);
 }
 
 void DGLShader::OnRelease() {

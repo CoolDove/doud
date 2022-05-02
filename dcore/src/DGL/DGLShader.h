@@ -2,7 +2,6 @@
 #include <string>
 #include "DGLObject.h"
 
-
 namespace DGL
 {
 enum class ShaderType : uint32_t {
@@ -33,7 +32,7 @@ class DGLNativeShader : public DGLObject
 class DGLShader : public DGLObject
 {
   public:
-    void Init(int count, ... );
+    void Init(std::initializer_list<DGLNativeShader*> shaders);
     void Bind();
   protected:
     virtual void OnRelease();

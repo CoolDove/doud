@@ -13,7 +13,6 @@ namespace Application
         switch (message)
         {
             case WM_PAINT: {
-                APP->Draw();
             } break;
             case WM_SIZE: {
                 APP->width = LOWORD(lparam);
@@ -46,6 +45,10 @@ namespace Application
         APP = new App(cmd_line);
         WindowTk::DWTKCreateWindow(instance, cmd_line, AppWndProc,1);
         DGL::InitOpenGL(WindowTk::window_handle);
+        DGL::DGL_ON_LOG = [](const std::string& msg) {
+            OutputDebugStringA(msg.c_str());
+        };
+        
         app_inited = true;
 
         APP->Init();
@@ -73,15 +76,6 @@ namespace Application
         ebuf.Init();
 
         using namespace DGL;
-        // glCreateVertexArrays(1, &vao);
-// 
-        // glVertexArrayAttribFormat(vao, 0, 3, GL_FLOAT, false, 0);
-        // glVertexArrayAttribBinding(vao, 0, 0);
-        // glEnableVertexArrayAttrib(vao, 0);
-// 
-        // glVertexArrayVertexBuffer(vao, 0, vbuf.GetNativeID(), 0, 3 * sizeof(float));
-        // glVertexArrayElementBuffer(vao, ebuf.GetNativeID());
-
         attrib_set.Init({ {Attribute::Type::POSITION, 3} });
 
         float vbuf_data[] = {
@@ -103,7 +97,7 @@ namespace Application
         frag.Init(ShaderType::FRAGMENT_SHADER);
         frag.Load("./res/shaders/test.frag");
 
-        shader.Init(2, &vert, &frag);
+        shader.Init({ &vert, &frag });
         shader.Bind();
         vert.Release();
         frag.Release();
@@ -114,6 +108,8 @@ namespace Application
         while (BOOL result = GetMessage(&msg, nullptr, 0, 0)) {
             if (result > 0) {
                 WindowTk::DWTKProcessWindowEvent(&msg);
+                if (DGL::DGL_INITED)
+                    Draw();
             } else {
                 break;
             }
@@ -121,23 +117,21 @@ namespace Application
     }
 
     void App::Draw() {
-        if (DGL::DGL_INITED) {
-            HWND wnd = WindowTk::window_handle;
-            HDC hdc = GetDC(wnd);
-            {
-                using namespace DGL;
-                SetClearColor({0.9f, 0.4f, 0.8f, 1.0f});
-                ClearFramebuffer(ClearMask::COLOR | ClearMask::DEPTH);
+        HWND wnd = WindowTk::window_handle;
+        HDC hdc = GetDC(wnd);
+        {
+            using namespace DGL;
+            SetClearColor({0.3f, 0.7f, 0.9f, 1.0f});
+            ClearFramebuffer(ClearMask::COLOR | ClearMask::DEPTH);
 
-                shader.Bind();
-                attrib_set.AttachVertexBuffer(&vbuf);
-                attrib_set.AttachIndexBuffer(&ebuf);
-                attrib_set.Bind();
-                
-                glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void*)0);
-            }
-            SwapBuffers(hdc);
+            shader.Bind();
+            attrib_set.AttachVertexBuffer(&vbuf);
+            attrib_set.AttachIndexBuffer(&ebuf);
+            attrib_set.Bind();
+
+            glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void*)0);
         }
+        SwapBuffers(hdc);
     }
 
 }
