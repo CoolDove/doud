@@ -1,9 +1,21 @@
 ﻿#include "DGL.h"
 #include <windows.h>
 #include <gl/GL.h>
+#define WGL_CONTEXT_MAJOR_VERSION_ARB           	0x2091
+#define WGL_CONTEXT_MINOR_VERSION_ARB           	0x2092
+#define WGL_CONTEXT_LAYER_PLANE_ARB             	0x2093
+#define WGL_CONTEXT_FLAGS_ARB                   	0x2094
+#define WGL_CONTEXT_PROFILE_MASK_ARB            	0x9126
+// bits for WGL_CONTEXT_FLAGS_ARB
+#define WGL_CONTEXT_DEBUG_BIT_ARB               	0x0001
+#define WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB  	0x0002
+// bits for WGL_CONTEXT_PROFILE_MASK_ARB
+#define WGL_CONTEXT_CORE_PROFILE_BIT_ARB        	0x00000001
+#define WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB 	0x00000002
 
 namespace DGL
 {
+
 bool DGL_INITED = false;
 
 void SetClearColor(glm::vec4 color) {
@@ -48,6 +60,42 @@ void InitOpenGL(HWND wnd_handle) {
     // gl_info.vendor               = (char*)glGetString(GL_VENDOR);
     // gl_info.renderer             = (char*)glGetString(GL_RENDERER);
     // gl_info.shading_lang_version = (char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
+
+    using wglCreateContextAttribsARB_t = 
+          HGLRC (WINAPI *) (HDC hDC, HGLRC hshareContext, const int *attribList);
+    wglCreateContextAttribsARB_t wglCreateContextAttribsARB
+        = (wglCreateContextAttribsARB_t)wglGetProcAddress("wglCreateContextAttribsARB");
+
+    if (wglCreateContextAttribsARB) {
+        HGLRC share_context = 0;
+        int attrib_list[] = {
+            WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
+            WGL_CONTEXT_MINOR_VERSION_ARB, 5,
+#ifdef DEBUG
+            WGL_CONTEXT_FLAGS_ARB,         WGL_CONTEXT_DEBUG_BIT_ARB,
+#endif
+            WGL_CONTEXT_PROFILE_MASK_ARB,  WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+            0
+        };
+        HDC dc = GetDC(wnd_handle);
+        HGLRC modern_glrc = wglCreateContextAttribsARB(dc, share_context, attrib_list);
+        if (modern_glrc) {
+            // switch to modern openGL context
+            wglMakeCurrent(dc, modern_glrc);
+            // gl_context_ = modern_glrc;
+        }
+
+        // NOTE: close the vsync
+        typedef void (APIENTRY *PFNWGLEXTSWAPCONTROLPROC) (int);
+        PFNWGLEXTSWAPCONTROLPROC wglSwapIntervalEXT = NULL;
+        wglSwapIntervalEXT = (PFNWGLEXTSWAPCONTROLPROC)wglGetProcAddress("wglSwapIntervalEXT");
+        wglSwapIntervalEXT(0);
+        
+#ifdef DEBUG
+        // gl_debug_init();
+#endif
+
+    }
     DGL_INITED = true;
 }
 }

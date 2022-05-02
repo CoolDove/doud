@@ -1,6 +1,7 @@
 ﻿#include "Application.h"
 #include "WindowTk.h"
 #include "DGL/DGL.h"
+#include "DoveLog.hpp"
 
 namespace Application
 {
@@ -36,19 +37,74 @@ namespace Application
     void InitApp(HINSTANCE instance, TCHAR* cmd_line) {
         if (app_inited) return;
 
+        DLOG_ON_PUSH = [](const Dove::LogMsg& _msg){
+            OutputDebugStringA(_msg.to_string(Dove::DMSG_FLAG_SIMPLE | Dove::DMSG_FLAG_FILE | Dove::DMSG_FLAG_LINE).c_str());
+            OutputDebugStringA("\n");
+        };
+        DLOG_INIT;
+
         APP = new App(cmd_line);
         WindowTk::DWTKCreateWindow(instance, cmd_line, AppWndProc,1);
         DGL::InitOpenGL(WindowTk::window_handle);
         app_inited = true;
+
+        APP->Init();
     }
     void Run() {
         if (app_inited) APP->Run();
     }
     void ReleaseApp() {
+        delete APP;
+        DLOG_CLOSE;
     }
 
     App::App(TCHAR* cmd_line) {
         // TODO:
+    }
+
+    App::~App() {
+        ebuf.Release();
+        vbuf.Release();
+        shader.Release();
+    }
+
+    void App::Init() {
+        vbuf.Init();
+        ebuf.Init();
+
+        using namespace DGL;
+        glCreateVertexArrays(1, &vao);
+
+        glVertexArrayAttribFormat(vao, 0, 3, GL_FLOAT, false, 0);
+        glVertexArrayAttribBinding(vao, 0, 0);
+        glEnableVertexArrayAttrib(vao, 0);
+
+        glVertexArrayVertexBuffer(vao, 0, vbuf.GetNativeID(), 0, 3 * sizeof(float));
+        glVertexArrayElementBuffer(vao, ebuf.GetNativeID());
+
+        float vbuf_data[] = {
+            0.0,   0.5, 0.0,
+            -0.5, -0.5, 0.0,
+             0.5, -0.5, 0.0
+        };
+        vbuf.Allocate(3 * 3 * sizeof(float), BufFlag::DYNAMIC_STORAGE_BIT | BufFlag::MAP_READ_BIT);
+        vbuf.Upload(3 * 3 * sizeof(float), 0, vbuf_data);
+
+        int ebuf_data[] = { 0, 1, 2 };
+        ebuf.Allocate(3 * sizeof(uint32_t), BufFlag::DYNAMIC_STORAGE_BIT | BufFlag::MAP_READ_BIT);
+        ebuf.Upload(3 * sizeof(uint32_t), 0, ebuf_data);
+
+        DGLNativeShader vert;
+        vert.Init(ShaderType::VERTEX_SHADER);
+        vert.Load("./res/shaders/test.vert");
+        DGLNativeShader frag;
+        frag.Init(ShaderType::FRAGMENT_SHADER);
+        frag.Load("./res/shaders/test.frag");
+
+        shader.Init(2, &vert, &frag);
+        shader.Bind();
+        vert.Release();
+        frag.Release();
     }
 
     void App::Run() {
@@ -70,6 +126,10 @@ namespace Application
                 using namespace DGL;
                 SetClearColor({0.9f, 0.4f, 0.8f, 1.0f});
                 ClearFramebuffer(ClearMask::COLOR | ClearMask::DEPTH);
+
+                shader.Bind();
+                glBindVertexArray(vao);
+                glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void*)0);
             }
             SwapBuffers(hdc);
         }

@@ -10,5 +10,6 @@
 int wWinMain(HINSTANCE instance, HINSTANCE prev_instance, TCHAR* cmd_line, int show_code) {
     Application::InitApp(instance, cmd_line);
     Application::Run();
+    Application::ReleaseApp();
 };
 #endif

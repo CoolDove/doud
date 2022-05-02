@@ -7,6 +7,8 @@
 #include "BitTagEnum.h"
 
 #include "DGLBuffer.h"
+#include "DGLGeometry.h"
+#include "DGLShader.h"
 
 namespace DGL
 {

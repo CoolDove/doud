@@ -9,16 +9,14 @@ namespace DGL
 class DGLObject
 {
   public:
-    void Init();
     void Release();
 
-    int GetNativeID() { return native_id; }
+    unsigned int GetNativeID() const { return native_id; }
     bool IsInited() { return native_id != 0; }
   protected:
-    virtual void OnInit() = 0;
     virtual void OnRelease() = 0;
   protected:
-    int native_id = 0;
+    unsigned int native_id = 0;
 };
 
 }
