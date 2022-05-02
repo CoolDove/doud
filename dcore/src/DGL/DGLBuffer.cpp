@@ -22,8 +22,7 @@ void DGLBuffer::Init() {
     glCreateBuffers(1, &native_id);
 }
 void DGLBuffer::OnRelease() {
-    glDeleteBuffers(1, &native_id);
-    native_id = 0;
+    if (native_id) glDeleteBuffers(1, &native_id);
 }
 
 }

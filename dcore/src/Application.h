@@ -2,7 +2,6 @@
 #include "DCore.h"
 #include <windows.h>
 #include "DGL/DGL.h"
-#include "DGL/DGLBuffer.h"
 
 namespace Application
 {
@@ -23,8 +22,7 @@ namespace Application
         DGL::DGLBuffer vbuf;
         DGL::DGLBuffer ebuf;
         DGL::DGLShader shader;
-        GLuint vao;
-        GLuint prog;
+        DGL::DGLVertexAttributeSet attrib_set;
         
         int width = 0;
         int height = 0;

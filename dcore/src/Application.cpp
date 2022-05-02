@@ -73,19 +73,21 @@ namespace Application
         ebuf.Init();
 
         using namespace DGL;
-        glCreateVertexArrays(1, &vao);
+        // glCreateVertexArrays(1, &vao);
+// 
+        // glVertexArrayAttribFormat(vao, 0, 3, GL_FLOAT, false, 0);
+        // glVertexArrayAttribBinding(vao, 0, 0);
+        // glEnableVertexArrayAttrib(vao, 0);
+// 
+        // glVertexArrayVertexBuffer(vao, 0, vbuf.GetNativeID(), 0, 3 * sizeof(float));
+        // glVertexArrayElementBuffer(vao, ebuf.GetNativeID());
 
-        glVertexArrayAttribFormat(vao, 0, 3, GL_FLOAT, false, 0);
-        glVertexArrayAttribBinding(vao, 0, 0);
-        glEnableVertexArrayAttrib(vao, 0);
-
-        glVertexArrayVertexBuffer(vao, 0, vbuf.GetNativeID(), 0, 3 * sizeof(float));
-        glVertexArrayElementBuffer(vao, ebuf.GetNativeID());
+        attrib_set.Init({ {Attribute::Type::POSITION, 3} });
 
         float vbuf_data[] = {
-            0.0,   0.5, 0.0,
-            -0.5, -0.5, 0.0,
-             0.5, -0.5, 0.0
+            0.0,  0.5, 0.0,
+           -0.5, -0.5, 0.0,
+            0.5, -0.5, 0.0
         };
         vbuf.Allocate(3 * 3 * sizeof(float), BufFlag::DYNAMIC_STORAGE_BIT | BufFlag::MAP_READ_BIT);
         vbuf.Upload(3 * 3 * sizeof(float), 0, vbuf_data);
@@ -128,7 +130,10 @@ namespace Application
                 ClearFramebuffer(ClearMask::COLOR | ClearMask::DEPTH);
 
                 shader.Bind();
-                glBindVertexArray(vao);
+                attrib_set.AttachVertexBuffer(&vbuf);
+                attrib_set.AttachIndexBuffer(&ebuf);
+                attrib_set.Bind();
+                
                 glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void*)0);
             }
             SwapBuffers(hdc);

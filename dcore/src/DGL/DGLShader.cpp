@@ -28,7 +28,7 @@ void DGLNativeShader::Init(ShaderType type) {
     this->type = type;
 }
 void DGLNativeShader::OnRelease() {
-    glDeleteShader(native_id);
+    if (native_id) glDeleteShader(native_id);
 }
 void DGLNativeShader::Load(const std::string& path) {
     char* src = read_file(path.c_str());
@@ -124,7 +124,7 @@ void DGLShader::Bind() {
 }
 
 void DGLShader::OnRelease() {
-    glDeleteProgram(native_id);
+    if (native_id) glDeleteProgram(native_id);
 }
 
 
