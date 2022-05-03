@@ -2,6 +2,7 @@
 #include "DCore.h"
 #include <windows.h>
 #include "DGL/DGL.h"
+#include <unordered_map>
 
 namespace Application
 {
@@ -11,7 +12,7 @@ namespace Application
 
     class App
     {
-        public:
+      public:
         App(TCHAR* cmd_line);
         ~App();
 
@@ -19,13 +20,14 @@ namespace Application
         void Init();
         void Draw();
 
-        DGL::DGLBuffer vbuf;
-        DGL::DGLBuffer ebuf;
-        DGL::DGLShader shader;
-        DGL::DGLVertexAttributeSet attrib_set;
-        
         int width = 0;
         int height = 0;
+      private:
+        DGL::DGLShader shader;
+        DGL::DGLGeometry geo_quad;
+        DGL::DGLGeometry geo_triangle;
+        std::unordered_map<std::string, DGL::DGLVertexAttributeSet*>
+            attrib_sets;
     };
     
     extern App app;

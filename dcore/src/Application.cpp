@@ -66,29 +66,32 @@ namespace Application
     }
 
     App::~App() {
-        ebuf.Release();
-        vbuf.Release();
         shader.Release();
+        geo_quad.Release();
+        geo_triangle.Release();
+        for (auto attribs : attrib_sets) delete attribs.second;
     }
 
     void App::Init() {
-        vbuf.Init();
-        ebuf.Init();
-
         using namespace DGL;
-        attrib_set.Init({ {Attribute::Type::POSITION, 3} });
 
-        float vbuf_data[] = {
-            0.0,  0.5, 0.0,
-           -0.5, -0.5, 0.0,
-            0.5, -0.5, 0.0
-        };
-        vbuf.Allocate(3 * 3 * sizeof(float), BufFlag::DYNAMIC_STORAGE_BIT | BufFlag::MAP_READ_BIT);
-        vbuf.Upload(3 * 3 * sizeof(float), 0, vbuf_data);
+        attrib_sets.emplace("P2U2", new DGL::DGLVertexAttributeSet());
+        attrib_sets.emplace("P3", new DGL::DGLVertexAttributeSet());
+        attrib_sets["P2U2"]->Init({ {Attribute::Type::POSITION, 2}, {Attribute::Type::UV, 2} });
+        attrib_sets["P3"]->Init({ {Attribute::Type::POSITION, 3} });
 
-        int ebuf_data[] = { 0, 1, 2 };
-        ebuf.Allocate(3 * sizeof(uint32_t), BufFlag::DYNAMIC_STORAGE_BIT | BufFlag::MAP_READ_BIT);
-        ebuf.Upload(3 * sizeof(uint32_t), 0, ebuf_data);
+        geo_triangle.Init({ {Attribute::Type::POSITION, 3} });
+        geo_triangle.vertices.emplace_back();
+        geo_triangle.vertices.emplace_back();
+        geo_triangle.vertices.emplace_back();
+        geo_triangle.vertices[0].position = {  0.0f,  0.5f, 0.0f , 1.0f};
+        geo_triangle.vertices[1].position = { -0.5f, -0.5f, 0.0f , 1.0f};
+        geo_triangle.vertices[2].position = {  0.5f, -0.5f, 0.0f , 1.0f};
+
+        geo_triangle.indices.emplace_back(0);
+        geo_triangle.indices.emplace_back(1);
+        geo_triangle.indices.emplace_back(2);
+        geo_triangle.Upload();
 
         DGLNativeShader vert;
         vert.Init(ShaderType::VERTEX_SHADER);
@@ -125,9 +128,9 @@ namespace Application
             ClearFramebuffer(ClearMask::COLOR | ClearMask::DEPTH);
 
             shader.Bind();
-            attrib_set.AttachVertexBuffer(&vbuf);
-            attrib_set.AttachIndexBuffer(&ebuf);
-            attrib_set.Bind();
+            attrib_sets["P3"]->AttachVertexBuffer(&geo_triangle.vbuf);
+            attrib_sets["P3"]->AttachIndexBuffer(&geo_triangle.ibuf);
+            attrib_sets["P3"]->Bind();
 
             glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void*)0);
         }

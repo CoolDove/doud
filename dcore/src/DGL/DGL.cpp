@@ -98,7 +98,6 @@ void InitOpenGL(HWND wnd_handle) {
 #ifdef DEBUG
         // gl_debug_init();
 #endif
-
     }
     DGL_INITED = true;
 }

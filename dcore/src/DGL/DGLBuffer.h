@@ -34,6 +34,7 @@ class DGLBuffer : public DGLObject
     void Allocate(size_t size_b, BufFlag flag);
     void Upload(size_t size_b, size_t offset_b, void* data);
     void Bind(BufType target);
+    size_t GetSizeB() const { return buffer_size_b; }
   private:
     size_t buffer_size_b = 0;
     bool allocated = false;
