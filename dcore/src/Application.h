@@ -27,11 +27,6 @@ namespace Application
         void BuildDGLRepo();
       private:
         DGLRepository glrepo;
-        DGL::DGLShader shader;
-        DGL::DGLGeometry geo_quad;
-        DGL::DGLGeometry geo_triangle;
-        std::unordered_map<std::string, DGL::DGLVertexAttributeSet*>
-            attrib_sets;
     };
     
     extern App app;

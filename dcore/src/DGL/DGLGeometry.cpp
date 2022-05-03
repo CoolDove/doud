@@ -26,17 +26,20 @@ void DGLVertexAttributeSet::AttachVertexBuffer(DGLBuffer* vbuf) {
 void DGLVertexAttributeSet::AttachIndexBuffer(DGLBuffer* ibuf) {
     if (native_id) glVertexArrayElementBuffer(native_id, ibuf->GetNativeID());
 }
+void DGLVertexAttributeSet::AttachGeometry(DGLGeometry* geom) {
+    AttachVertexBuffer(geom->GetVertexBuffer());
+    AttachIndexBuffer(geom->GetIndexBuffer());
+}
+
 void DGLVertexAttributeSet::Bind() {
     if (native_id) glBindVertexArray(native_id);
 }
 void DGLVertexAttributeSet::OnRelease() {
     if (native_id) glDeleteVertexArrays(1, &native_id);
-    DGLLog("vertex attrib set released");
 }
 
-
 /* >>>>DGLGeometry>>>> */
-void DGLGeometry::Init(std::initializer_list<Attribute> attribs) {
+void DGLGeometry::SetAttributes(std::initializer_list<Attribute> attribs) {
     for (auto ite = attribs.begin(); ite != attribs.end(); ite++) {
         attributes.push_back(*ite);
     }
@@ -56,16 +59,18 @@ size_t DGLGeometry::GetVertexDataStride() {
 }
 
 void DGLGeometry::Upload() {
+    if (attributes.size() == 0 || indices.size() == 0 || vertices.size() == 0) {
+        DGLLog("invalid geometry data");
+        return;
+    }
     {// vertex buffer
         if (vbuf.GetNativeID()) vbuf.Release();
         size_t stride_byte = GetVertexDataStride();
         float* vdata = (float*)malloc(stride_byte * vertices.size());
         int current = 0;
-
         int uv_count = 0;
         int color_count = 0;
         int normal_count = 0;
-
         for (int i = 0; i < vertices.size(); i++) {
             for (int a = 0; a < attributes.size(); a++) {
                 Attribute* atb = &attributes[a];
@@ -114,6 +119,7 @@ void DGLGeometry::Upload() {
     }
 
     {// index buffer
+        if (ibuf.GetNativeID()) ibuf.Release();
         ibuf.Init();
         ibuf.Allocate(indices.size() * sizeof(unsigned int), BufFlag::DYNAMIC_STORAGE_BIT);
         ibuf.Upload(ibuf.GetSizeB(), 0, (void*)indices.data());

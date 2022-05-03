@@ -4,20 +4,15 @@ DGLRepository::~DGLRepository()
 {
     for (auto ite = vattrib_sets.begin(); ite != vattrib_sets.end(); ite++)
     {
-        ite->second->Release();
         delete ite->second;
     }
     for (auto ite = shaders.begin(); ite != shaders.end(); ite++) {
-        ite->second->Release();
         delete ite->second;
     }
     for (auto ite = geometries.begin(); ite != geometries.end(); ite++) {
-        ite->second->Release();
         delete ite->second;
     }
 }
-
-
 
 void DGLRepository::PushVertexAttributeSet(const std::string& name, DGL::DGLVertexAttributeSet* vaset) {
     if (vattrib_sets.find(name) != vattrib_sets.end()) return;

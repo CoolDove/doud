@@ -66,15 +66,11 @@ namespace Application
     }
 
     App::~App() {
-        shader.Release();
-        geo_quad.Release();
-        geo_triangle.Release();
-        for (auto attribs : attrib_sets) delete attribs.second;
-
         DLOG_DEBUG("app released");
     }
 
     void App::BuildDGLRepo() {
+        using namespace DGL;
         {// vas
             auto p2u2 = new DGL::DGLVertexAttributeSet();
             p2u2->Init({ {Attribute::Type::POSITION, 2}, {Attribute::Type::UV, 2} });
@@ -85,38 +81,59 @@ namespace Application
             glrepo.PushVertexAttributeSet("P3", p3);
         }
         {// shader
+            DGLNativeShader vert;
+            vert.Init(ShaderType::VERTEX_SHADER);
+            vert.Load("./res/shaders/test.vert");
+            DGLNativeShader frag;
+            frag.Init(ShaderType::FRAGMENT_SHADER);
+            frag.Load("./res/shaders/test.frag");
+            DGLShader* shader = new DGLShader();
+            shader->Init({ &vert, &frag });
+            glrepo.PushShader("test", shader);
+        }
+        {// geometry
+            DGLGeometry* triangle = new DGLGeometry();
+            triangle->SetAttributes({ {Attribute::Type::POSITION, 3} });
+            for (int i = 0; i < 3; i++) triangle->vertices.emplace_back();
+
+            triangle->vertices[0].position = {  0.0f,  0.5f, 0.0f , 1.0f};
+            triangle->vertices[0].uv0 = { 0.5f, 1.0f };
+
+            triangle->vertices[1].position = { -0.5f, -0.5f, 0.0f , 1.0f};
+            triangle->vertices[1].uv0 = { 0.0f, 0.0f };
+
+            triangle->vertices[2].position = {  0.5f, -0.5f, 0.0f , 1.0f};
+            triangle->vertices[2].uv0 = { 1.0f, 0.0f };
+
+            triangle->indices.emplace_back(0);
+            triangle->indices.emplace_back(1);
+            triangle->indices.emplace_back(2);
+            triangle->Upload();
+
+            DGLGeometry* uquad = new DGLGeometry();
+            uquad->SetAttributes({ {Attribute::Type::POSITION, 3} });
+            for (int i = 0; i < 4; i++) uquad->vertices.emplace_back();
+            uquad->vertices[0].position = { -0.5f, -0.5f, 0.0f, 1.0f };
+            uquad->vertices[1].position = { -0.5f,  0.5f, 0.0f, 1.0f };
+            uquad->vertices[2].position = {  0.5f,  0.5f, 0.0f, 1.0f };
+            uquad->vertices[3].position = {  0.5f, -0.5f, 0.0f, 1.0f };
+
+            uquad->indices.emplace_back(0);
+            uquad->indices.emplace_back(1);
+            uquad->indices.emplace_back(2);
+            uquad->indices.emplace_back(0);
+            uquad->indices.emplace_back(2);
+            uquad->indices.emplace_back(3);
+            uquad->Upload();
+
+            glrepo.PushGeometry("test_triangle", triangle);
+            glrepo.PushGeometry("unit_quad", uquad);
         }
         
     }
     
     void App::Init() {
-        using namespace DGL;
-
-        geo_triangle.Init({ {Attribute::Type::POSITION, 3} });
-        geo_triangle.vertices.emplace_back();
-        geo_triangle.vertices.emplace_back();
-        geo_triangle.vertices.emplace_back();
-        geo_triangle.vertices[0].position = {  0.0f,  0.5f, 0.0f , 1.0f};
-        geo_triangle.vertices[1].position = { -0.5f, -0.5f, 0.0f , 1.0f};
-        geo_triangle.vertices[2].position = {  0.5f, -0.5f, 0.0f , 1.0f};
-
-        geo_triangle.indices.emplace_back(0);
-        geo_triangle.indices.emplace_back(1);
-        geo_triangle.indices.emplace_back(2);
-        geo_triangle.Upload();
-
-
-        DGLNativeShader vert;
-        vert.Init(ShaderType::VERTEX_SHADER);
-        vert.Load("./res/shaders/test.vert");
-        DGLNativeShader frag;
-        frag.Init(ShaderType::FRAGMENT_SHADER);
-        frag.Load("./res/shaders/test.frag");
-
-        shader.Init({ &vert, &frag });
-        shader.Bind();
-        vert.Release();
-        frag.Release();
+        BuildDGLRepo();
     }
 
     void App::Run() {
@@ -140,13 +157,15 @@ namespace Application
             SetClearColor({0.3f, 0.7f, 0.9f, 1.0f});
             ClearFramebuffer(ClearMask::COLOR | ClearMask::DEPTH);
 
-            shader.Bind();
-            auto vas_p3 = glrepo.GetVertexAttributeSet("P3");
-            if (vas_p3) {
-                vas_p3->AttachVertexBuffer(&geo_triangle.vbuf);
-                vas_p3->AttachIndexBuffer(&geo_triangle.ibuf);
+            DGLGeometry* geom_quad = glrepo.GetGeometry("unit_quad");
+            DGLShader* shader = glrepo.GetShader("test");
+            shader->Bind();
+
+            DGLVertexAttributeSet* vas_p3 = glrepo.GetVertexAttributeSet("P3");
+            if (geom_quad && shader && vas_p3) {
+                vas_p3->AttachGeometry(geom_quad);
                 vas_p3->Bind();
-                glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void*)0);
+                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
             }
         }
         SwapBuffers(hdc);
