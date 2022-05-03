@@ -93,7 +93,7 @@ namespace Application
         }
         {// geometry
             DGLGeometry* triangle = new DGLGeometry();
-            triangle->SetAttributes({ {Attribute::Type::POSITION, 3} });
+            triangle->SetAttributes({ {Attribute::Type::POSITION, 2}, { Attribute::Type::UV, 2 } });
             for (int i = 0; i < 3; i++) triangle->vertices.emplace_back();
 
             triangle->vertices[0].position = {  0.0f,  0.5f, 0.0f , 1.0f};
@@ -111,12 +111,16 @@ namespace Application
             triangle->Upload();
 
             DGLGeometry* uquad = new DGLGeometry();
-            uquad->SetAttributes({ {Attribute::Type::POSITION, 3} });
+            uquad->SetAttributes({ {Attribute::Type::POSITION, 2}, { Attribute::Type::UV, 2 }});
             for (int i = 0; i < 4; i++) uquad->vertices.emplace_back();
             uquad->vertices[0].position = { -0.5f, -0.5f, 0.0f, 1.0f };
+            uquad->vertices[0].uv0 = { 0.0f, 0.0f };
             uquad->vertices[1].position = { -0.5f,  0.5f, 0.0f, 1.0f };
+            uquad->vertices[1].uv0 = { 0.0f, 1.0f };
             uquad->vertices[2].position = {  0.5f,  0.5f, 0.0f, 1.0f };
+            uquad->vertices[2].uv0 = { 1.0f, 1.0f };
             uquad->vertices[3].position = {  0.5f, -0.5f, 0.0f, 1.0f };
+            uquad->vertices[3].uv0 = { 1.0f, 0.0f };
 
             uquad->indices.emplace_back(0);
             uquad->indices.emplace_back(1);
@@ -161,7 +165,7 @@ namespace Application
             DGLShader* shader = glrepo.GetShader("test");
             shader->Bind();
 
-            DGLVertexAttributeSet* vas_p3 = glrepo.GetVertexAttributeSet("P3");
+            DGLVertexAttributeSet* vas_p3 = glrepo.GetVertexAttributeSet("P2U2");
             if (geom_quad && shader && vas_p3) {
                 vas_p3->AttachGeometry(geom_quad);
                 vas_p3->Bind();
