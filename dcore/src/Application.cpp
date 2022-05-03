@@ -70,15 +70,27 @@ namespace Application
         geo_quad.Release();
         geo_triangle.Release();
         for (auto attribs : attrib_sets) delete attribs.second;
+
+        DLOG_DEBUG("app released");
     }
 
+    void App::BuildDGLRepo() {
+        {// vas
+            auto p2u2 = new DGL::DGLVertexAttributeSet();
+            p2u2->Init({ {Attribute::Type::POSITION, 2}, {Attribute::Type::UV, 2} });
+            auto p3 = new DGL::DGLVertexAttributeSet();
+            p3->Init({ {Attribute::Type::POSITION, 3} });
+
+            glrepo.PushVertexAttributeSet("P2U2", p2u2);
+            glrepo.PushVertexAttributeSet("P3", p3);
+        }
+        {// shader
+        }
+        
+    }
+    
     void App::Init() {
         using namespace DGL;
-
-        attrib_sets.emplace("P2U2", new DGL::DGLVertexAttributeSet());
-        attrib_sets.emplace("P3", new DGL::DGLVertexAttributeSet());
-        attrib_sets["P2U2"]->Init({ {Attribute::Type::POSITION, 2}, {Attribute::Type::UV, 2} });
-        attrib_sets["P3"]->Init({ {Attribute::Type::POSITION, 3} });
 
         geo_triangle.Init({ {Attribute::Type::POSITION, 3} });
         geo_triangle.vertices.emplace_back();
@@ -92,6 +104,7 @@ namespace Application
         geo_triangle.indices.emplace_back(1);
         geo_triangle.indices.emplace_back(2);
         geo_triangle.Upload();
+
 
         DGLNativeShader vert;
         vert.Init(ShaderType::VERTEX_SHADER);
@@ -128,11 +141,13 @@ namespace Application
             ClearFramebuffer(ClearMask::COLOR | ClearMask::DEPTH);
 
             shader.Bind();
-            attrib_sets["P3"]->AttachVertexBuffer(&geo_triangle.vbuf);
-            attrib_sets["P3"]->AttachIndexBuffer(&geo_triangle.ibuf);
-            attrib_sets["P3"]->Bind();
-
-            glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void*)0);
+            auto vas_p3 = glrepo.GetVertexAttributeSet("P3");
+            if (vas_p3) {
+                vas_p3->AttachVertexBuffer(&geo_triangle.vbuf);
+                vas_p3->AttachIndexBuffer(&geo_triangle.ibuf);
+                vas_p3->Bind();
+                glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void*)0);
+            }
         }
         SwapBuffers(hdc);
     }

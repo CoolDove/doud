@@ -3,6 +3,7 @@
 #include <windows.h>
 #include "DGL/DGL.h"
 #include <unordered_map>
+#include "DGLRepository.h"
 
 namespace Application
 {
@@ -23,6 +24,9 @@ namespace Application
         int width = 0;
         int height = 0;
       private:
+        void BuildDGLRepo();
+      private:
+        DGLRepository glrepo;
         DGL::DGLShader shader;
         DGL::DGLGeometry geo_quad;
         DGL::DGLGeometry geo_triangle;
