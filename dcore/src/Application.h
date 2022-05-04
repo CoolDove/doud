@@ -4,6 +4,7 @@
 #include "DGL/DGL.h"
 #include <unordered_map>
 #include "DGLRepository.h"
+#include "CloudGenerator.h"
 
 namespace Application
 {
@@ -19,7 +20,11 @@ namespace Application
 
         void Run();
         void Init();
+
+        void Update();
         void Draw();
+
+        void GenerateCloud();
 
         int width = 0;
         int height = 0;
@@ -28,6 +33,7 @@ namespace Application
         void BuildDGLRepo();
       private:
         DGLRepository glrepo;
+        CloudGenerator* cloud = nullptr;
     };
     
     extern App app;

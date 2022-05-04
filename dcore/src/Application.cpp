@@ -13,13 +13,6 @@ namespace Application
         LRESULT result = 0;
         switch (message)
         {
-            // case WM_PAINT: {
-                // static int paint_count = 0;
-                // paint_count++;
-                // DLOG_DEBUG("paint: %d", paint_count);
-                // // if (DGL::DGL_INITED)
-                    // // APP->Draw();
-            // } break;
             case WM_SIZE: {
                 APP->width = LOWORD(lparam);
                 APP->height = HIWORD(lparam);
@@ -30,6 +23,12 @@ namespace Application
             } break;
             case WM_DESTROY: {
                 PostQuitMessage(0);
+            } break;
+            case WM_KEYDOWN:
+            {
+                if (wparam == VK_SPACE) {
+                    APP->GenerateCloud();
+                }
             } break;
             default:
             {
@@ -72,6 +71,7 @@ namespace Application
     }
 
     App::~App() {
+        delete cloud;
         DLOG_DEBUG("app released");
     }
 
@@ -141,12 +141,13 @@ namespace Application
             int width, height, desired_channels, channels;
             desired_channels = 4;
 
-            std::string path = "./res/textures/jko.png";
+            std::string path = "./res/textures/noise.png";
             void* pixels = stbi_load(path.c_str(), &width, &height, &channels, desired_channels);
             if (pixels) {
                 tex->Allocate(width, height);
                 tex->Upload(pixels);
-                glrepo.PushTexture("jko", tex);
+                free(pixels);
+                glrepo.PushTexture("noise", tex);
             } else {
                 DLOG_ERROR("failed to load texture: %s", path.c_str());
             }
@@ -156,6 +157,7 @@ namespace Application
     
     void App::Init() {
         BuildDGLRepo();
+        cloud = new CloudGenerator();
     }
 
     void App::Run() {
@@ -165,7 +167,10 @@ namespace Application
                 TranslateMessage(&msg);
                 DispatchMessage(&msg);
 
+                // Update();
                 Draw();
+
+                SwapBuffers(hdc);
 
             } else {
                 break;
@@ -173,29 +178,40 @@ namespace Application
         }
     }
 
+    void App::Update() {
+    }
+
     void App::Draw() {
-        {
-            using namespace DGL;
-            SetClearColor({0.3f, 0.7f, 0.9f, 1.0f});
-            ClearFramebuffer(ClearMask::COLOR | ClearMask::DEPTH);
+        using namespace DGL;
+        SetClearColor({0.3f, 0.7f, 0.9f, 1.0f});
+        ClearFramebuffer(ClearMask::COLOR | ClearMask::DEPTH);
 
-            DGLGeometry* geom_quad = glrepo.GetGeometry("unit_quad");
-            DGLShader* shader = glrepo.GetShader("test");
-            DGLTexture2D* tex = glrepo.GetTexture2D("jko");
-            shader->Bind();
+        DGLGeometry* geom_quad = glrepo.GetGeometry("unit_quad");
+        DGLShader* shader = glrepo.GetShader("test");
+        // DGLTexture2D* tex = glrepo.GetTexture2D("noise");
+        DGLTexture2D* tex = cloud->CloudTex();
+        shader->Bind();
 
-            DGLVertexAttributeSet* vas_p3 = glrepo.GetVertexAttributeSet("P2U2");
-            if (geom_quad && shader && vas_p3 && tex) {
-                vas_p3->AttachGeometry(geom_quad);
-                vas_p3->Bind();
+        DGLVertexAttributeSet* vas_p3 = glrepo.GetVertexAttributeSet("P2U2");
+        if (geom_quad && shader && vas_p3 && tex) {
+            vas_p3->AttachGeometry(geom_quad);
+            vas_p3->Bind();
 
-                tex->Bind(0);
-                shader->UniformI("tex", 0);
+            tex->Bind(0);
+            shader->UniformI("noise", 0);
 
-                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
-            }
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
+        } else {
+            DLOG_ERROR("resources missing in glrepo");
         }
-        SwapBuffers(hdc);
+    }
+
+    void App::GenerateCloud() {
+        if (cloud) {
+            cloud->Generate();
+        } else {
+            DLOG_ERROR("cloud generator has not been initialized");
+        }
     }
 
 }
