@@ -36,7 +36,7 @@ void SetViewport(int x, int y, int width, int height) {
 }
 
 
-void InitOpenGL(HWND wnd_handle) {
+HDC InitOpenGL(HWND wnd_handle) {
     HDC device_context = GetDC(wnd_handle);
 
     PIXELFORMATDESCRIPTOR desired_pixel_format = {};
@@ -82,23 +82,24 @@ void InitOpenGL(HWND wnd_handle) {
             WGL_CONTEXT_PROFILE_MASK_ARB,  WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
             0
         };
-        HDC dc = GetDC(wnd_handle);
-        HGLRC modern_glrc = wglCreateContextAttribsARB(dc, share_context, attrib_list);
+        // HDC dc = GetDC(wnd_handle);
+        HGLRC modern_glrc = wglCreateContextAttribsARB(device_context, share_context, attrib_list);
         if (modern_glrc) {
             // switch to modern openGL context
-            wglMakeCurrent(dc, modern_glrc);
+            wglMakeCurrent(device_context, modern_glrc);
         }
 
         // NOTE: close the vsync
         typedef void (APIENTRY *PFNWGLEXTSWAPCONTROLPROC) (int);
         PFNWGLEXTSWAPCONTROLPROC wglSwapIntervalEXT = NULL;
         wglSwapIntervalEXT = (PFNWGLEXTSWAPCONTROLPROC)wglGetProcAddress("wglSwapIntervalEXT");
-        wglSwapIntervalEXT(0);
+        wglSwapIntervalEXT(1);
         
 #ifdef DEBUG
         // gl_debug_init();
 #endif
     }
     DGL_INITED = true;
+    return device_context;
 }
 }

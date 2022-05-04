@@ -13,6 +13,8 @@ namespace Application
         switch (message)
         {
             case WM_PAINT: {
+                if (DGL::DGL_INITED)
+                    APP->Draw();
             } break;
             case WM_SIZE: {
                 APP->width = LOWORD(lparam);
@@ -44,7 +46,7 @@ namespace Application
 
         APP = new App(cmd_line);
         WindowTk::DWTKCreateWindow(instance, cmd_line, AppWndProc,1);
-        DGL::InitOpenGL(WindowTk::window_handle);
+        APP->hdc = DGL::InitOpenGL(WindowTk::window_handle);
         DGL::DGL_ON_LOG = [](const std::string& msg) {
             OutputDebugStringA(msg.c_str());
         };
@@ -95,16 +97,12 @@ namespace Application
             DGLGeometry* triangle = new DGLGeometry();
             triangle->SetAttributes({ {Attribute::Type::POSITION, 2}, { Attribute::Type::UV, 2 } });
             for (int i = 0; i < 3; i++) triangle->vertices.emplace_back();
-
             triangle->vertices[0].position = {  0.0f,  0.5f, 0.0f , 1.0f};
             triangle->vertices[0].uv0 = { 0.5f, 1.0f };
-
             triangle->vertices[1].position = { -0.5f, -0.5f, 0.0f , 1.0f};
             triangle->vertices[1].uv0 = { 0.0f, 0.0f };
-
             triangle->vertices[2].position = {  0.5f, -0.5f, 0.0f , 1.0f};
             triangle->vertices[2].uv0 = { 1.0f, 0.0f };
-
             triangle->indices.emplace_back(0);
             triangle->indices.emplace_back(1);
             triangle->indices.emplace_back(2);
@@ -142,20 +140,20 @@ namespace Application
 
     void App::Run() {
         MSG msg;
-        while (BOOL result = GetMessage(&msg, nullptr, 0, 0)) {
-            if (result > 0) {
-                WindowTk::DWTKProcessWindowEvent(&msg);
-                if (DGL::DGL_INITED)
-                    Draw();
-            } else {
-                break;
+        bool quit = false;
+        while (!quit) {
+            if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+                if (msg.message == WM_QUIT) {
+                    quit = true;
+                } else {
+                    TranslateMessage(&msg);
+                    DispatchMessage(&msg);
+                }
             }
         }
     }
 
     void App::Draw() {
-        HWND wnd = WindowTk::window_handle;
-        HDC hdc = GetDC(wnd);
         {
             using namespace DGL;
             SetClearColor({0.3f, 0.7f, 0.9f, 1.0f});

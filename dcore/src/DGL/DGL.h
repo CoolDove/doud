@@ -15,7 +15,7 @@
 namespace DGL
 {
 extern bool DGL_INITED;
-void InitOpenGL(HWND wnd_handle);
+HDC InitOpenGL(HWND wnd_handle);
 
 using DGLLogFunction = void(*)(const std::string& msg);
 extern DGLLogFunction DGL_ON_LOG;

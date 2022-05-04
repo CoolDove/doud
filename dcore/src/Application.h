@@ -23,6 +23,7 @@ namespace Application
 
         int width = 0;
         int height = 0;
+        HDC hdc;
       private:
         void BuildDGLRepo();
       private:
