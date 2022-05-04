@@ -25,7 +25,7 @@ void CloudGenerator::Generate() {
 
     DGLGeometry* geom_quad = glrepo->GetGeometry("unit_quad");
     DGLShader* shader = glrepo->GetShader("test");
-    DGLTexture2D* tex_noise = glrepo->GetTexture2D("noise");
+    DGLTexture2D* tex_noise = glrepo->GetTexture2D("jko");
     DGLVertexAttributeSet* vas_p3 = glrepo->GetVertexAttributeSet("P2U2");
     if (geom_quad && shader && vas_p3) {
         vas_p3->AttachGeometry(geom_quad);

@@ -26,6 +26,11 @@ namespace Application
 
         void GenerateCloud();
 
+        const int GameMargin = 20;
+        const int GamePicSize = 600;
+        const int GameWidth = 600;
+        const int GameHeight = 1024;
+
         int width = 0;
         int height = 0;
         HDC hdc;

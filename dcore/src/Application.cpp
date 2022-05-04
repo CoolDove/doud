@@ -3,6 +3,7 @@
 #include "DGL/DGL.h"
 #include "DoveLog.hpp"
 #include "stb_image/stb_image.h"
+#include "DUI.h"
 
 namespace Application
 {
@@ -69,8 +70,17 @@ namespace Application
     App::App(TCHAR* cmd_line) {
         // TODO:
     }
+    
+    // init
+    void App::Init() {
+        BuildDGLRepo();
+        cloud = new CloudGenerator(&glrepo);
+        DUI::Init();
+    }
 
+    // release
     App::~App() {
+        DUI::Release();
         delete cloud;
         DLOG_DEBUG("app released");
     }
@@ -141,23 +151,18 @@ namespace Application
             int width, height, desired_channels, channels;
             desired_channels = 4;
 
-            std::string path = "./res/textures/noise.png";
+            std::string path = "./res/textures/jko.png";
             void* pixels = stbi_load(path.c_str(), &width, &height, &channels, desired_channels);
             if (pixels) {
                 tex->Allocate(width, height);
                 tex->Upload(pixels);
                 free(pixels);
-                glrepo.PushTexture("noise", tex);
+                glrepo.PushTexture("jko", tex);
             } else {
                 DLOG_ERROR("failed to load texture: %s", path.c_str());
             }
         }
         
-    }
-    
-    void App::Init() {
-        BuildDGLRepo();
-        cloud = new CloudGenerator(&glrepo);
     }
 
     void App::Run() {
@@ -166,12 +171,8 @@ namespace Application
             if (result > 0) {
                 TranslateMessage(&msg);
                 DispatchMessage(&msg);
-
                 Update();
-                Draw();
-
                 SwapBuffers(hdc);
-
             } else {
                 break;
             }
@@ -179,35 +180,21 @@ namespace Application
     }
 
     void App::Update() {
-    }
-
-    void App::Draw() {
         using namespace DGL;
-
-        DGLFramebuffer::BindDefaultFramebuffer(FramebufferType::FRAMEBUFFER);
+        DGLFramebuffer::BindDefaultFramebuffer();
         SetViewport(0, 0, width, height);
-        
         SetClearColor({0.3f, 0.7f, 0.9f, 1.0f});
         ClearFramebuffer(ClearMask::COLOR | ClearMask::DEPTH);
 
-        DGLGeometry* geom_quad = glrepo.GetGeometry("unit_quad");
-        DGLShader* shader = glrepo.GetShader("test");
-        // DGLTexture2D* tex = glrepo.GetTexture2D("noise");
-        DGLTexture2D* tex = cloud->CloudTex();
-        shader->Bind();
-
-        DGLVertexAttributeSet* vas_p3 = glrepo.GetVertexAttributeSet("P2U2");
-        if (geom_quad && shader && vas_p3 && tex) {
-            vas_p3->AttachGeometry(geom_quad);
-            vas_p3->Bind();
-
-            tex->Bind(0);
-            shader->UniformI("noise", 0);
-
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
-        } else {
-            DLOG_ERROR("resources missing in glrepo");
+        DUI::Begin(0, GameMargin, GameWidth, GameHeight, width, height);
+        DUI::DrawImage(cloud->CloudTex(), GameMargin, 0, 600, 600);
+        {
+            DUI::Begin(0, GamePicSize + GameMargin, GameWidth, GameHeight, width, height);
+            DUI::DrawImage(glrepo.GetTexture2D("jko"), GameMargin, 0, 200, 100);
+            DUI::DrawImage(glrepo.GetTexture2D("jko"), GameMargin + 200 + 20, 0, 200, 100);
+            DUI::End();
         }
+        DUI::End();
     }
 
     void App::GenerateCloud() {
