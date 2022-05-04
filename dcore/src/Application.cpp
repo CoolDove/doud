@@ -2,6 +2,7 @@
 #include "WindowTk.h"
 #include "DGL/DGL.h"
 #include "DoveLog.hpp"
+#include "stb_image/stb_image.h"
 
 namespace Application
 {
@@ -131,6 +132,22 @@ namespace Application
             glrepo.PushGeometry("test_triangle", triangle);
             glrepo.PushGeometry("unit_quad", uquad);
         }
+        {// textures
+            DGLTexture2D* tex = new DGLTexture2D();
+            tex->Init();
+            int width, height, desired_channels, channels;
+            desired_channels = 4;
+
+            std::string path = "./res/textures/jko.png";
+            void* pixels = stbi_load(path.c_str(), &width, &height, &channels, desired_channels);
+            if (pixels) {
+                tex->Allocate(width, height);
+                tex->Upload(pixels);
+                glrepo.PushTexture("jko", tex);
+            } else {
+                DLOG_ERROR("failed to load texture: %s", path.c_str());
+            }
+        }
         
     }
     
@@ -161,12 +178,17 @@ namespace Application
 
             DGLGeometry* geom_quad = glrepo.GetGeometry("unit_quad");
             DGLShader* shader = glrepo.GetShader("test");
+            DGLTexture2D* tex = glrepo.GetTexture2D("jko");
             shader->Bind();
 
             DGLVertexAttributeSet* vas_p3 = glrepo.GetVertexAttributeSet("P2U2");
-            if (geom_quad && shader && vas_p3) {
+            if (geom_quad && shader && vas_p3 && tex) {
                 vas_p3->AttachGeometry(geom_quad);
                 vas_p3->Bind();
+
+                tex->Bind(0);
+                shader->UniformI("tex", 0);
+
                 glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
             }
         }

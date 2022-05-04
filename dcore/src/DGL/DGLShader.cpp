@@ -115,6 +115,82 @@ void DGLShader::Init(std::initializer_list<DGLNativeShader*> shaders) {
     }
 }
 
+GLint DGLShader::LocateUniform(const std::string& name) {
+    if (uniform_location_cache.find(name) == uniform_location_cache.end()) {
+        // we didnt find the location in the cache
+        GLuint loc = glGetUniformLocation(native_id, name.c_str());
+        if (loc == -1) {
+            DGLLog("uniform name: ");
+            DGLLog(name.c_str());
+            DGLLog(" not found\n");
+            return -1;
+        }
+        uniform_location_cache[name] = loc;
+        return loc;
+    } else {
+        return uniform_location_cache[name];
+    }
+}
+
+void DGLShader::UniformI(const std::string& name, int32_t v0){
+    glUniform1i(LocateUniform(name), v0);
+}
+void DGLShader::UniformI(const std::string& name, int32_t v0, int32_t v1){
+    glUniform2i(LocateUniform(name), v0, v1);
+}
+void DGLShader::UniformI(const std::string& name, int32_t v0, int32_t v1, int32_t v2){
+    glUniform3i(LocateUniform(name), v0, v1, v2);
+}
+void DGLShader::UniformI(const std::string& name, int32_t v0, int32_t v1, int32_t v2, int32_t v3){
+    glUniform4i(LocateUniform(name), v0, v1, v2, v3);
+}
+
+void DGLShader::UniformF(const std::string& name, float v0){
+    glUniform1f(LocateUniform(name), v0);
+}
+void DGLShader::UniformF(const std::string& name, float v0, float v1){
+    glUniform2f(LocateUniform(name), v0, v1);
+}
+void DGLShader::UniformF(const std::string& name, float v0, float v1, float v2){
+    glUniform3f(LocateUniform(name), v0, v1, v2);
+}
+void DGLShader::UniformF(const std::string& name, float v0, float v1, float v2, float v3){
+    glUniform4f(LocateUniform(name), v0, v1, v2, v3);
+}
+
+void DGLShader::UniformUI(const std::string& _name, uint32_t v0){
+    glUniform1ui(LocateUniform(_name), v0);
+}
+void DGLShader::UniformUI(const std::string& _name, uint32_t v0, uint32_t v1){
+    glUniform2ui(LocateUniform(_name), v0, v1);
+}
+void DGLShader::UniformUI(const std::string& _name, uint32_t v0, uint32_t v1, uint32_t v2){
+    glUniform3ui(LocateUniform(_name), v0, v1, v2);
+}
+void DGLShader::UniformUI(const std::string& _name, uint32_t v0, uint32_t v1, uint32_t v2, uint32_t v3){
+    glUniform4ui(LocateUniform(_name), v0, v1, v2, v3);
+}
+
+void DGLShader::UniformMat(const std::string& name, uint32_t dimensions, const float* data, bool transpose, int count){
+    if (dimensions > 4) dimensions = 4;
+    if (dimensions < 2) dimensions = 2;
+
+    switch (dimensions)
+    {
+    case 2:
+        glUniformMatrix2fv(LocateUniform(name), count, transpose, data);
+        break;
+    case 3:
+        glUniformMatrix3fv(LocateUniform(name), count, transpose, data);
+        break;
+    case 4:
+        glUniformMatrix4fv(LocateUniform(name), count, transpose, data);
+        break;
+    default:
+        break;
+    }
+}
+
 void DGLShader::Bind() {
     if (native_id) glUseProgram(native_id);
 }

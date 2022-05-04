@@ -12,6 +12,9 @@ DGLRepository::~DGLRepository()
     for (auto ite = geometries.begin(); ite != geometries.end(); ite++) {
         delete ite->second;
     }
+    for (auto ite = textures.begin(); ite != textures.end(); ite++) {
+        delete ite->second;
+    }
 }
 
 void DGLRepository::PushVertexAttributeSet(const std::string& name, DGL::DGLVertexAttributeSet* vaset) {
@@ -26,6 +29,10 @@ void DGLRepository::PushGeometry(const std::string& name, DGL::DGLGeometry* geom
     if (geometries.find(name) != geometries.end()) return;
     geometries[name] = geom;
 }
+void DGLRepository::PushTexture(const std::string& name, DGL::DGLTexture2D* tex) {
+    if (textures.find(name) != textures.end()) return;
+    textures[name] = tex;
+}
 
 DGL::DGLVertexAttributeSet* DGLRepository::DGLRepository::GetVertexAttributeSet(const std::string& name) {
     if (vattrib_sets.find(name) == vattrib_sets.end()) return nullptr;
@@ -38,5 +45,10 @@ DGL::DGLShader* DGLRepository::GetShader(const std::string& name) {
 DGL::DGLGeometry* DGLRepository::GetGeometry(const std::string& name) {
     if (geometries.find(name) == geometries.end()) return nullptr;
     return geometries[name];
+}
+
+DGL::DGLTexture2D* DGLRepository::GetTexture2D(const std::string& name) {
+    if (textures.find(name) == textures.end()) return nullptr;
+    return textures[name];
 }
 

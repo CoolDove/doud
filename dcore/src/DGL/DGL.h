@@ -11,6 +11,7 @@
 #include "DGLBuffer.h"
 #include "DGLGeometry.h"
 #include "DGLShader.h"
+#include "DGLTexture.h"
 
 namespace DGL
 {

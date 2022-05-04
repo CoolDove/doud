@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <string>
+#include <unordered_map>
 #include "DGLObject.h"
 
 namespace DGL
@@ -34,6 +35,29 @@ class DGLShader : public DGLObject
   public:
     void Init(std::initializer_list<DGLNativeShader*> shaders);
     void Bind();
+  public:
+    // NOTE: you have to manually bind this program before setting uniforms !!!!!!
+    void UniformI(const std::string& name, int32_t v0);
+    void UniformI(const std::string& name, int32_t v0, int32_t v1);
+    void UniformI(const std::string& name, int32_t v0, int32_t v1, int32_t v2);
+    void UniformI(const std::string& name, int32_t v0, int32_t v1, int32_t v2, int32_t v3);
+
+    void UniformF(const std::string& name, float v0);
+    void UniformF(const std::string& name, float v0, float v1);
+    void UniformF(const std::string& name, float v0, float v1, float v2);
+    void UniformF(const std::string& name, float v0, float v1, float v2, float v3);
+
+    void UniformUI(const std::string& name, uint32_t v0);
+    void UniformUI(const std::string& name, uint32_t v0, uint32_t v1);
+    void UniformUI(const std::string& name, uint32_t v0, uint32_t v1, uint32_t v2);
+    void UniformUI(const std::string& name, uint32_t v0, uint32_t v1, uint32_t v2, uint32_t v3);
+
+    void UniformMat(const std::string& name, uint32_t dimensions, const float* data, bool transpose = false, int count = 1);
+
+  private:
+    GLint LocateUniform(const std::string& name);
+    std::unordered_map<std::string, GLuint> uniform_location_cache;
+  
   protected:
     virtual void OnRelease();
 };
