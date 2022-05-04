@@ -157,7 +157,7 @@ namespace Application
     
     void App::Init() {
         BuildDGLRepo();
-        cloud = new CloudGenerator();
+        cloud = new CloudGenerator(&glrepo);
     }
 
     void App::Run() {
@@ -167,7 +167,7 @@ namespace Application
                 TranslateMessage(&msg);
                 DispatchMessage(&msg);
 
-                // Update();
+                Update();
                 Draw();
 
                 SwapBuffers(hdc);
@@ -183,6 +183,10 @@ namespace Application
 
     void App::Draw() {
         using namespace DGL;
+
+        DGLFramebuffer::BindDefaultFramebuffer(FramebufferType::FRAMEBUFFER);
+        SetViewport(0, 0, width, height);
+        
         SetClearColor({0.3f, 0.7f, 0.9f, 1.0f});
         ClearFramebuffer(ClearMask::COLOR | ClearMask::DEPTH);
 

@@ -12,6 +12,7 @@
 #include "DGLGeometry.h"
 #include "DGLShader.h"
 #include "DGLTexture.h"
+#include "DGLFramebuffer.h"
 
 namespace DGL
 {
