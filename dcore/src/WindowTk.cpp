@@ -17,7 +17,7 @@ void DWTKCreateWindow(HINSTANCE instance, TCHAR* cmd_line, WndProc wnd_proc, int
     window_handle = CreateWindowEx(
         0, wnd_class.lpszClassName,
         _T("doud"),
-        WS_OVERLAPPEDWINDOW,
+        WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_THICKFRAME, 
         CW_USEDEFAULT, 
         CW_USEDEFAULT,
         800, 

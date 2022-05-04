@@ -13,10 +13,13 @@ namespace Application
         LRESULT result = 0;
         switch (message)
         {
-            case WM_PAINT: {
-                if (DGL::DGL_INITED)
-                    APP->Draw();
-            } break;
+            // case WM_PAINT: {
+                // static int paint_count = 0;
+                // paint_count++;
+                // DLOG_DEBUG("paint: %d", paint_count);
+                // // if (DGL::DGL_INITED)
+                    // // APP->Draw();
+            // } break;
             case WM_SIZE: {
                 APP->width = LOWORD(lparam);
                 APP->height = HIWORD(lparam);
@@ -157,15 +160,15 @@ namespace Application
 
     void App::Run() {
         MSG msg;
-        bool quit = false;
-        while (!quit) {
-            if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-                if (msg.message == WM_QUIT) {
-                    quit = true;
-                } else {
-                    TranslateMessage(&msg);
-                    DispatchMessage(&msg);
-                }
+        while (BOOL result = GetMessage(&msg, nullptr, 0, 0)) {
+            if (result > 0) {
+                TranslateMessage(&msg);
+                DispatchMessage(&msg);
+
+                Draw();
+
+            } else {
+                break;
             }
         }
     }
